@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Evidence-bound LLM gateway incident triage and telemetry diagnostics engine powered by AMD ROCm infrastructure.">
+    <title>IncidentLens AMD — ROCm Telemetry Diagnostics</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <main>
+      <header class="header">
+        <div class="header-badges">
+          <span class="badge badge-amd">AMD Developer Hackathon: ACT III</span>
+          <span class="badge badge-accent">ROCm TokenFactory</span>
+          <span id="model-badge" class="badge badge-subtle">Model: DeepSeek-V4-Flash</span>
+          <span class="badge badge-team">Team: team-9992</span>
+        </div>
+        <h1>IncidentLens AMD</h1>
+        <p class="lede">
+          Evidence-bound LLM gateway incident triage and telemetry diagnostics engine.
+          Parses SSE lifecycles, detects ghost spend and retry storms, and generates verifiable root-cause remediations strictly citing event IDs on AMD ROCm infrastructure.
+        </p>
+      </header>
+
+      <!-- Live Performance & Telemetry Strip -->
+      <section class="telemetry-bar" aria-labelledby="telemetry-heading">
+        <h2 id="telemetry-heading" class="sr-only">Live Gateway Telemetry</h2>
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <span class="metric-label">Status & Severity</span>
+            <span id="stat-severity" class="metric-val status-normal">READY</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Anomalies Detected</span>
+            <span id="stat-anomalies" class="metric-val">0</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Trace Events</span>
+            <span id="stat-events" class="metric-val">0</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">AMD Inference Latency</span>
+            <span id="stat-latency" class="metric-val">—</span>
+          </div>
+          <div class="metric-card highlight">
+            <span class="metric-label">Citation Integrity</span>
+            <span id="stat-citation" class="metric-val">100% Gate</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Incident Preset Selector & Run Control -->
+      <section class="control-panel" aria-labelledby="presets-heading">
+        <div class="panel-header">
+          <h2 id="presets-heading">Select Gateway Incident Scenario</h2>
+          <span class="panel-sub">Simulate production failure modes</span>
+        </div>
+        <div class="preset-buttons">
+          <button type="button" class="preset-btn active" data-preset="premature-disconnect">
+            <span class="preset-icon">⚡</span>
+            <div class="preset-info">
+              <span class="preset-title">SSE Premature Disconnection & Ghost Token Spend</span>
+              <span class="preset-desc">Client aborts stream; unconsumed upstream tokens generate billing discrepancy</span>
+            </div>
+          </button>
+          <button type="button" class="preset-btn" data-preset="retry-storm">
+            <span class="preset-icon">🌊</span>
+            <div class="preset-info">
+              <span class="preset-title">Retry Storm & HTTP 429 Cascade</span>
+              <span class="preset-desc">Rapid retries without backoff breach upstream rate limits</span>
+            </div>
+          </button>
+          <button type="button" class="preset-btn" data-preset="cache-poisoning">
+            <span class="preset-icon">⚠️</span>
+            <div class="preset-info">
+              <span class="preset-title">Cache Inconsistency on Truncated Stream</span>
+              <span class="preset-desc">Write scheduled on partial stream payload lacking [DONE] sentinel</span>
+            </div>
+          </button>
+        </div>
+        <div class="action-row">
+          <button type="button" id="analyze-btn" class="primary-btn">
+            Analyze Incident with AMD ROCm Inference →
+          </button>
+        </div>
+      </section>
+
+      <!-- Trace Timeline Waterfall -->
+      <section class="timeline-panel" aria-labelledby="timeline-heading">
+        <div class="panel-header">
+          <h2 id="timeline-heading">Deterministic Trace Timeline & Anomaly Matrix</h2>
+          <span id="event-count-badge" class="badge badge-subtle">0 Events</span>
+        </div>
+        <div class="table-wrapper">
+          <table class="trace-table">
+            <thead>
+              <tr>
+                <th>Event ID</th>
+                <th>Timestamp</th>
+                <th>Event Type</th>
+                <th>Details & Payload Summary</th>
+                <th>Status / Severity</th>
+              </tr>
+            </thead>
+            <tbody id="timeline-tbody">
+              <tr>
+                <td colspan="5" class="empty-state">Select an incident scenario above and click 'Analyze Incident'.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- AMD ROCm Root Cause & Verified Remediation -->
+      <section id="analysis-panel" class="analysis-panel" aria-labelledby="analysis-heading" hidden>
+        <div class="panel-header">
+          <div>
+            <h2 id="analysis-heading">Evidence-Bound Root Cause Analysis</h2>
+            <p class="panel-sub">Generated by AMD ROCm Model & Validated by Deterministic Citation Gate</p>
+          </div>
+          <div id="citation-badge-container"></div>
+        </div>
+
+        <div class="analysis-content">
+          <div id="diagnosis-box" class="diagnosis-box"></div>
+        </div>
+
+        <!-- Telemetry Details Strip -->
+        <div class="rocm-telemetry-box">
+          <div class="rocm-chip">
+            <span class="rocm-label">ROCm Model:</span>
+            <code id="rocm-model-val">—</code>
+          </div>
+          <div class="rocm-chip">
+            <span class="rocm-label">Provider:</span>
+            <code id="rocm-provider-val">—</code>
+          </div>
+          <div class="rocm-chip">
+            <span class="rocm-label">Inference Time:</span>
+            <code id="rocm-time-val">—</code>
+          </div>
+          <div class="rocm-chip">
+            <span class="rocm-label">Tokens:</span>
+            <code id="rocm-tokens-val">—</code>
+          </div>
+        </div>
+      </section>
+
+      <aside class="safety-footer">
+        <strong>Safety Guarantee:</strong> IncidentLens AMD enforces deterministic event IDs.
+        Every diagnosis and remediation step must cite at least one verified event ID (`[EVT-XXX]`).
+        Uncited model assertions are rejected fail-closed to eliminate AI hallucination during production incidents.
+      </aside>
+    </main>
+  </body>
+</html>

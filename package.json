@@ -1,0 +1,22 @@
+{
+  "name": "incidentlens-amd",
+  "version": "0.1.0",
+  "description": "Evidence-bound LLM gateway incident triage and telemetry diagnostics engine powered by AMD ROCm infrastructure",
+  "type": "module",
+  "main": "start_server.mjs",
+  "scripts": {
+    "start": "node start_server.mjs",
+    "test": "node --test test/*.test.mjs"
+  },
+  "keywords": [
+    "amd",
+    "rocm",
+    "llm-gateway",
+    "incident-analysis",
+    "telemetry",
+    "observability",
+    "ai-safety"
+  ],
+  "author": "Siddharth Srivastava",
+  "license": "MIT"
+}
