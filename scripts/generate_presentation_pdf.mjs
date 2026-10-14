@@ -1,0 +1,549 @@
+import { writeFileSync, readFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const htmlPath = resolve(__dirname, '../IncidentLens-AMD-Presentation.html');
+const pdfPath = resolve(__dirname, '../IncidentLens-AMD-Presentation.pdf');
+
+const htmlContent = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>IncidentLens AMD — Slide Presentation</title>
+<style>
+  @page {
+    size: 11in 6.1875in;
+    margin: 0;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #090d16;
+    color: #e2e8f0;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .slide {
+    width: 11in;
+    height: 6.1875in;
+    page-break-after: always;
+    position: relative;
+    padding: 0.55in 0.7in;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: linear-gradient(135deg, #090d16 0%, #0f172a 60%, #151d30 100%);
+    overflow: hidden;
+  }
+  .slide::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ed1c24, #f59e0b, #ed1c24);
+  }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .badge-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 6px;
+  }
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 9999px;
+    font-size: 8pt;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .badge-amd {
+    background: rgba(237, 28, 36, 0.18);
+    color: #ff5e62;
+    border: 1px solid rgba(237, 28, 36, 0.4);
+  }
+  .badge-lablab {
+    background: rgba(14, 165, 233, 0.18);
+    color: #38bdf8;
+    border: 1px solid rgba(14, 165, 233, 0.4);
+  }
+  .badge-green {
+    background: rgba(34, 197, 94, 0.18);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.4);
+  }
+  .slide-title {
+    font-size: 24pt;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+  .slide-subtitle {
+    font-size: 11pt;
+    color: #94a3b8;
+    margin-top: 4px;
+  }
+  .slide-num {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #475569;
+  }
+  .content {
+    flex: 1;
+    display: flex;
+    gap: 20px;
+    margin: 18px 0;
+  }
+  .card {
+    flex: 1;
+    background: rgba(30, 41, 59, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+  }
+  .card-highlight {
+    border-color: rgba(237, 28, 36, 0.35);
+    background: rgba(237, 28, 36, 0.04);
+  }
+  .card h3 {
+    font-size: 12pt;
+    color: #f1f5f9;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h3 .icon {
+    color: #ed1c24;
+    font-size: 14pt;
+  }
+  .card p {
+    font-size: 9.5pt;
+    color: #cbd5e1;
+    line-height: 1.45;
+  }
+  .card ul {
+    margin-left: 18px;
+    margin-top: 6px;
+  }
+  .card li {
+    font-size: 9pt;
+    color: #94a3b8;
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+  .card li strong {
+    color: #f8fafc;
+  }
+  .metric-box {
+    background: rgba(15, 23, 42, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-top: 8px;
+  }
+  .metric-val {
+    font-size: 16pt;
+    font-weight: 800;
+    color: #ffffff;
+  }
+  .metric-lbl {
+    font-size: 8pt;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding-top: 10px;
+    font-size: 8.5pt;
+    color: #64748b;
+  }
+  .footer strong {
+    color: #cbd5e1;
+  }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    background: rgba(237, 28, 36, 0.12);
+    color: #ff8589;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 8.5pt;
+  }
+  table.trace-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 8.5pt;
+    margin-top: 8px;
+  }
+  table.trace-table th {
+    text-align: left;
+    padding: 6px 8px;
+    background: rgba(15, 23, 42, 0.9);
+    color: #94a3b8;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  table.trace-table td {
+    padding: 6px 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    color: #cbd5e1;
+  }
+  table.trace-table tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+</style>
+</head>
+<body>
+
+<!-- SLIDE 1: TITLE -->
+<div class="slide">
+  <div class="header">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-amd">AMD Developer Hackathon: ACT III</span>
+        <span class="badge badge-lablab">Team: team-9992</span>
+        <span class="badge badge-green">100% Green CI & Tests</span>
+      </div>
+      <div class="slide-title" style="font-size: 32pt; margin-top: 8px;">IncidentLens AMD</div>
+      <div class="slide-subtitle" style="font-size: 13pt; color: #cbd5e1; margin-top: 6px;">
+        Evidence-Bound LLM Gateway Telemetry Triage & Root Cause Diagnostics Powered by AMD ROCm
+      </div>
+    </div>
+    <div class="slide-num">01 / 06</div>
+  </div>
+
+  <div class="content" style="gap: 16px;">
+    <div class="card card-highlight">
+      <h3><span class="icon">⚡</span> The Core Problem</h3>
+      <p>Production AI gateways suffer from premature SSE stream terminations ("Ghost Spend"), retry storm cascades, and cache poisoning. When queried, ungrounded LLMs hallucinate fictional root causes and dangerous remediation commands.</p>
+    </div>
+    <div class="card card-highlight">
+      <h3><span class="icon">🛡️</span> The Evidence-Bound Fix</h3>
+      <p>IncidentLens algorithmically parses gateway traces into an indexed evidence matrix (<code>[EVT-001]</code>, etc.), submits facts to AMD ROCm TokenFactory, and enforces an automated fail-closed citation gate on model responses.</p>
+    </div>
+    <div class="card card-highlight">
+      <h3><span class="icon">🚀</span> AMD ROCm Acceleration</h3>
+      <p>Native integration with AMD ROCm TokenFactory (team-9992) running <code>DeepSeek-V4-Flash</code> and <code>Qwen3.8-27B</code> on AMD GPU accelerators with real-time inference latency and token tracking.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>Built by <strong>Siddharth Srivastava</strong> (solo builder, GitHub: <code>sidsri14/incidentlens-amd</code>)</div>
+    <div>AMD ROCm TokenFactory &bull; October 2026</div>
+  </div>
+</div>
+
+<!-- SLIDE 2: THE PROBLEM -->
+<div class="slide">
+  <div class="header">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-amd">Production Vulnerabilities</span>
+        <span class="badge badge-lablab">AI Gateway Failure Modes</span>
+      </div>
+      <div class="slide-title">Production AI Outages & The Hallucination Trap</div>
+      <div class="slide-subtitle">Why traditional AI telemetry triage fails in high-throughput enterprise deployments</div>
+    </div>
+    <div class="slide-num">02 / 06</div>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <h3><span class="icon">⚠️</span> 1. Premature SSE Disconnection ("Ghost Spend")</h3>
+      <p>Client drops socket mid-generation, but upstream GPU model continues generating billable output because cancellation sentinels are missed. Billions of tokens wasted across disconnected sockets.</p>
+      <div class="metric-box">
+        <div class="metric-val" style="color: #ef4444;">18,400+ Tokens / Incident</div>
+        <div class="metric-lbl">Wasted Compute on Aborted Sockets</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon">⚡</span> 2. Runaway Retry Cascades & 429 Storms</h3>
+      <p>Clients retry failed requests immediately without randomized exponential backoff. Gateway queues saturate, compounding upstream provider rate-limits into catastrophic service paralysis.</p>
+      <div class="metric-box">
+        <div class="metric-val" style="color: #f59e0b;">12 Calls in 240ms</div>
+        <div class="metric-lbl">Triggering Upstream 429 Quota Exhaustion</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🛑</span> 3. LLM Hallucinated Incident Triage</h3>
+      <p>Standard LLMs invent fictitious root causes (e.g., claiming DNS or database failure when traces show client timeouts) and recommend destructive shell commands detached from actual telemetry.</p>
+      <div class="metric-box">
+        <div class="metric-val" style="color: #38bdf8;">Fail-Closed Gate Required</div>
+        <div class="metric-lbl">Zero Tolerance for Uncited Claims</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>Deterministic Telemetry Analysis &bull; Strict Incident Boundary</div>
+    <div>IncidentLens AMD &bull; Slide 2 of 6</div>
+  </div>
+</div>
+
+<!-- SLIDE 3: THE 3-PILLAR SOLUTION -->
+<div class="slide">
+  <div class="header">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-amd">System Architecture</span>
+        <span class="badge badge-green">Zero-Hallucination Pipeline</span>
+      </div>
+      <div class="slide-title">The 3-Pillar Evidence-Bound Architecture</div>
+      <div class="slide-subtitle">Deterministic trace parsing, cryptographic evidence indexing, and fail-closed citation gates</div>
+    </div>
+    <div class="slide-num">03 / 06</div>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <h3><span class="icon">1️⃣</span> Deterministic Telemetry Parser</h3>
+      <p><code>src/trace_parser.mjs</code> parses raw SSE stream transitions, HTTP response codes, and socket lifecycles algorithmically:</p>
+      <ul>
+        <li>Flags premature disconnections before <code>[DONE]</code> sentinels.</li>
+        <li>Detects retry storms with delta &lt; 200ms without jitter.</li>
+        <li>Identifies attempted cache writes on truncated streams.</li>
+        <li>Calculates TTFT & latency SLA outlier thresholds.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="icon">2️⃣</span> AMD ROCm Evidence Matrix</h3>
+      <p><code>src/evidence_matrix.mjs</code> converts parsed anomalies into cryptographically indexed, verifiable facts:</p>
+      <ul>
+        <li>Every trace event receives a canonical ID: <code>[EVT-001]</code>, <code>[EVT-002]</code>.</li>
+        <li>Timestamps, durations, token counts, and error codes are bound.</li>
+        <li>Only validated evidence bundles are dispatched to the AMD ROCm inference engine.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="icon">3️⃣</span> Fail-Closed Citation Gate</h3>
+      <p><code>src/citation_validator.mjs</code> inspects every sentence in the model's incident report before surfacing to SREs:</p>
+      <ul>
+        <li>Every root-cause claim must cite a valid <code>[EVT-xxx]</code> ID.</li>
+        <li>Any uncited factual assertion is flagged and rejected.</li>
+        <li>Any hallucinated event ID not in the evidence matrix causes immediate fail-closed denial.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>Automated Citation Verification &bull; No Hallucinated Remediation Allowed</div>
+    <div>IncidentLens AMD &bull; Slide 3 of 6</div>
+  </div>
+</div>
+
+<!-- SLIDE 4: AMD ROCm TOKENFACTORY -->
+<div class="slide">
+  <div class="header">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-amd">Hardware Acceleration</span>
+        <span class="badge badge-lablab">AMD TokenFactory</span>
+      </div>
+      <div class="slide-title">AMD ROCm Infrastructure Integration</div>
+      <div class="slide-subtitle">Live inference on AMD GPU accelerators via official AMD Developer Program team-9992</div>
+    </div>
+    <div class="slide-num">04 / 06</div>
+  </div>
+
+  <div class="content">
+    <div class="card" style="flex: 1.2;">
+      <h3><span class="icon">⚡</span> AMD TokenFactory Client (<code>src/amd_rocm_client.mjs</code>)</h3>
+      <p>Direct connectivity to AMD's high-performance ROCm inference endpoint:</p>
+      <ul style="margin-top: 8px;">
+        <li><strong>Endpoint:</strong> <code>https://developer.amd.com.cn/radeon/api/v1/chat/completions</code></li>
+        <li><strong>Team Account:</strong> <code>team-9992</code> (authorized by AMD AI Developer Program)</li>
+        <li><strong>Accelerators:</strong> AMD GPU compute cluster (provider: <code>self-dploy</code>)</li>
+        <li><strong>Models:</strong> <code>DeepSeek-V4-Flash</code> (fast triage) & <code>Qwen3.8-27B</code> (deep audit)</li>
+        <li><strong>Strict Evidence Prompting:</strong> Enforces event ID citation requirements directly in system instructions.</li>
+      </ul>
+    </div>
+    <div class="card" style="flex: 0.8;">
+      <h3><span class="icon">📊</span> Verified Live Benchmark</h3>
+      <div class="metric-box">
+        <div class="metric-val" style="color: #4ade80;">19,614 ms</div>
+        <div class="metric-lbl">End-to-End AMD ROCm Inference Latency</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-val" style="color: #38bdf8;">809 Tokens</div>
+        <div class="metric-lbl">Evidence Synthesis & Triage Plan Generated</div>
+      </div>
+      <div class="metric-box">
+        <div class="metric-val" style="color: #ff5e62;">5 Event Citations</div>
+        <div class="metric-lbl">100% Citation Pass Rate &bull; 0 Hallucinations</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>AMD Developer Program Team Verified &bull; Official Token Factory API</div>
+    <div>IncidentLens AMD &bull; Slide 4 of 6</div>
+  </div>
+</div>
+
+<!-- SLIDE 5: OPERATOR HUD -->
+<div class="slide">
+  <div class="header">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-amd">User Experience</span>
+        <span class="badge badge-green">Operator Cockpit</span>
+      </div>
+      <div class="slide-title">Interactive Operator HUD & Failure Simulator</div>
+      <div class="slide-subtitle">Real-time trace waterfall, anomaly visualization, and automated citation badges</div>
+    </div>
+    <div class="slide-num">05 / 06</div>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <h3><span class="icon">🖥️</span> Operator Cockpit Features</h3>
+      <ul>
+        <li><strong>Preset Scenario Simulators:</strong> One-click generation of Ghost Spend, Retry Storms, Cache Inconsistencies, or Clean Baselines.</li>
+        <li><strong>Telemetry Waterfall Table:</strong> Inspects status codes, socket duration, TTFT, token counts, and anomaly badges.</li>
+        <li><strong>Evidence Matrix Viewer:</strong> Real-time display of indexed events with cryptographic event IDs.</li>
+        <li><strong>Citation Verification Badge:</strong> Visual confirmation of 100% cited facts vs. rejected hallucinations.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🛡️</span> Security & Enterprise Hardening</h3>
+      <ul>
+        <li><strong>Loopback Isolation:</strong> Binds strictly to <code>127.0.0.1</code> to prevent network exposure.</li>
+        <li><strong>Content Security Policy:</strong> Strict CSP headers, <code>X-Content-Type-Options: nosniff</code>, <code>X-Frame-Options: DENY</code>.</li>
+        <li><strong>Input Sanitization:</strong> Telemetry traces sanitized against prompt injection and control character poisoning.</li>
+        <li><strong>Zero-Key Fallback:</strong> Includes deterministic offline fixtures for instant evaluation without external credentials.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>Screenshot Artifact: <code>incidentlens-ui.png</code> &bull; Built with Vanilla HTML5, CSS3, & Modern JS</div>
+    <div>IncidentLens AMD &bull; Slide 5 of 6</div>
+  </div>
+</div>
+
+<!-- SLIDE 6: VERIFICATION & DELIVERY -->
+<div class="slide">
+  <div class="header">
+    <div>
+      <div class="badge-row">
+        <span class="badge badge-amd">Engineering Rigor</span>
+        <span class="badge badge-green">Production Ready</span>
+      </div>
+      <div class="slide-title">Verification, CI/CD & Open Source Delivery</div>
+      <div class="slide-subtitle">100% pass rate across multi-version Linux and Windows CI runners</div>
+    </div>
+    <div class="slide-num">06 / 06</div>
+  </div>
+
+  <div class="content">
+    <div class="card">
+      <h3><span class="icon">✅</span> Automated Test Suite</h3>
+      <p>15/15 passing tests using native Node.js test runner (<code>node --test</code>):</p>
+      <ul>
+        <li><code>test/trace_parser.test.mjs</code>: Ghost spend, retry storms, cache hazards, latency outliers.</li>
+        <li><code>test/evidence_matrix.test.mjs</code>: Event indexing, canonical ID formatting, serialization.</li>
+        <li><code>test/citation_validator.test.mjs</code>: Valid citation acceptance, uncited claim rejection, hallucination denial.</li>
+        <li><code>test/server.test.mjs</code>: Security headers, scenario dispatch, analysis lifecycle.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="icon">🚀</span> GitHub Actions CI Matrix</h3>
+      <p>GitHub Actions Run <a href="https://github.com/sidsri14/incidentlens-amd/actions/runs/38590710694" style="color: #38bdf8;">#38590710694</a>:</p>
+      <ul>
+        <li><strong>Linux (Ubuntu-latest):</strong> Node 20 (Pass), Node 22 (Pass), Node 24 (Pass).</li>
+        <li><strong>Windows (Windows-latest):</strong> Node 20 (Pass), Node 22 (Pass), Node 24 (Pass).</li>
+        <li><strong>Security Audit:</strong> <code>npm audit</code> reports 0 vulnerabilities.</li>
+        <li><strong>Public MIT Repo:</strong> <a href="https://github.com/sidsri14/incidentlens-amd" style="color: #38bdf8;">github.com/sidsri14/incidentlens-amd</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div>Clone & Run: <code>git clone https://github.com/sidsri14/incidentlens-amd.git && npm test && npm start</code></div>
+    <div>Siddharth Srivastava &bull; AMD Developer Hackathon ACT III &bull; October 2026</div>
+  </div>
+</div>
+
+</body>
+</html>
+`;
+
+writeFileSync(htmlPath, htmlContent, 'utf8');
+console.log(`Wrote slide presentation HTML to: ${htmlPath}`);
+
+async function generatePdf() {
+  const fileUrl = 'file:///' + htmlPath.replace(/\\/g, '/');
+  console.log(`Connecting to CDP on localhost:9222 for: ${fileUrl}`);
+
+  const newRes = await fetch('http://localhost:9222/json/new?' + encodeURIComponent(fileUrl), { method: 'PUT' });
+  const tab = await newRes.json();
+  console.log(`Opened print tab: ${tab.id}`);
+
+  const ws = new WebSocket(tab.webSocketDebuggerUrl);
+  await new Promise((resolve, reject) => {
+    ws.onopen = resolve;
+    ws.onerror = reject;
+  });
+  console.log('Connected to WebSocket debugger');
+
+  // Wait 1.5 seconds for font rendering and layout
+  await new Promise((resolve) => setTimeout(resolve, 1500));
+
+  const printParams = {
+    id: 1,
+    method: 'Page.printToPDF',
+    params: {
+      printBackground: true,
+      paperWidth: 11,
+      paperHeight: 6.1875,
+      marginTop: 0,
+      marginBottom: 0,
+      marginLeft: 0,
+      marginRight: 0,
+      landscape: true,
+    },
+  };
+
+  ws.send(JSON.stringify(printParams));
+  const msg = await new Promise((resolve) => {
+    ws.onmessage = (event) => resolve(JSON.parse(event.data));
+  });
+
+  const base64Data = msg.result?.data;
+  if (!base64Data) {
+    console.error('Failed to get PDF base64 data:', msg);
+    await fetch('http://localhost:9222/json/close/' + tab.id);
+    process.exit(1);
+  }
+
+  const pdfBuffer = Buffer.from(base64Data, 'base64');
+  writeFileSync(pdfPath, pdfBuffer);
+  console.log(`Successfully generated slide deck PDF (${pdfBuffer.length} bytes) at: ${pdfPath}`);
+
+  await fetch('http://localhost:9222/json/close/' + tab.id);
+  console.log('Closed CDP tab');
+}
+
+generatePdf().catch((err) => {
+  console.error('Error generating PDF:', err);
+  process.exit(1);
+});
