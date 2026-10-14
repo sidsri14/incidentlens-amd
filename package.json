@@ -6,7 +6,7 @@
   "main": "start_server.mjs",
   "scripts": {
     "start": "node start_server.mjs",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test"
   },
   "keywords": [
     "amd",
