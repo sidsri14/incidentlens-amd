@@ -1,14 +1,39 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "cleanUrls": true,
-  "headers": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "Referrer-Policy", "value": "no-referrer" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "DENY" }
-      ]
+      "src": "api/*.mjs",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "public/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/analyze",
+      "dest": "/api/analyze.mjs"
+    },
+    {
+      "src": "/api/presets",
+      "dest": "/api/presets.mjs"
+    },
+    {
+      "src": "/api/health",
+      "dest": "/api/health.mjs"
+    },
+    {
+      "src": "/health",
+      "dest": "/api/health.mjs"
+    },
+    {
+      "src": "/",
+      "dest": "/public/index.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
     }
   ]
 }
