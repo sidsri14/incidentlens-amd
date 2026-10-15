@@ -26,6 +26,12 @@ IncidentLens enforces a strict dual-boundary architecture:
 
 ![IncidentLens AMD UI Screenshot](incidentlens-ui.png)
 
+**Public evaluation demo:** [incidentlens-amd.vercel.app](https://incidentlens-amd.vercel.app/)
+
+The hosted demo intentionally runs in deterministic evaluation mode. Configure
+`AMD_API_KEY` locally to exercise the authenticated TokenFactory path without
+exposing the event credential to a public browser.
+
 ---
 
 ## Architecture
