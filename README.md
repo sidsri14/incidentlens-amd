@@ -13,7 +13,7 @@
 
 ## Overview
 
-**IncidentLens AMD** is an evidence-bound incident triage and telemetry diagnostics engine for high-throughput LLM gateways. It resolves a critical failure mode in AI systems operations: when AI assistants are tasked with diagnosing gateway outages, they frequently hallucinate causes or recommend speculative fixes disconnected from actual trace events.
+**IncidentLens AMD** is an evidence-bound incident triage and telemetry diagnostics prototype for LLM gateways. It addresses a concrete failure mode in AI-assisted operations: a model can produce plausible incident explanations or remediation steps that are not connected to the supplied trace events.
 
 IncidentLens enforces a strict dual-boundary architecture:
 1. **Deterministic Telemetry Parser**: Ingests raw gateway logs, parses Server-Sent Events (SSE) lifecycle transitions, and algorithmically identifies structural anomalies:
@@ -22,7 +22,7 @@ IncidentLens enforces a strict dual-boundary architecture:
    - **Cache Inconsistency on Partial Streams**: Identifies attempted cache writes on truncated streams.
    - **Latency SLA Outliers**: Tracks Time-To-First-Token (TTFT) and inter-chunk latency spikes.
 2. **AMD ROCm Evidence Matrix**: Indexes all trace points into verifiable event IDs (`[EVT-001]`, `[EVT-002]`, etc.) and sends only the factual evidence bundle to AMD ROCm TokenFactory.
-3. **Automated Citation Verification Gate**: Evaluates the model's response; every root cause explanation and remediation step must explicitly cite at least one verified event ID. Any uncited claim or hallucinated ID is rejected **fail-closed**.
+3. **Automated Citation Verification Gate**: Evaluates the model's response; every non-heading claim unit must cite at least one known event ID. Outputs containing an uncited claim or an unknown event ID are rejected **fail-closed**. This verifies citation coverage and ID validity, not whether every cited inference is logically correct.
 
 ![IncidentLens AMD UI Screenshot](incidentlens-ui.png)
 
@@ -60,11 +60,20 @@ IncidentLens enforces a strict dual-boundary architecture:
 
 ## Key Features
 
-- **AMD ROCm Accelerated Inference**: Connected directly to AMD TokenFactory (`https://developer.amd.com.cn/radeon/api/v1`) running on AMD GPU hardware.
-- **Fail-Closed Citation Gate**: Completely eliminates AI hallucination during production incidents.
+- **AMD ROCm Inference Integration**: Connects to AMD TokenFactory (`https://developer.amd.com.cn/radeon/api/v1`) when `AMD_API_KEY` is configured.
+- **Fail-Closed Citation Gate**: Rejects missing or unknown event citations before displaying a model report; it does not claim to prove the report's reasoning.
 - **Zero-Key Local Simulation Mode**: Evaluators and judges can run `npm start` immediately without cloud credentials to test full scenarios.
-- **Interactive Operator HUD**: Modern dark-mode dashboard displaying live timeline waterfalls, ROCm latency benchmarks, and verified root-cause remediation cards.
-- **Comprehensive Test Suite**: 15/15 passing native Node test runner suites with zero external runtime dependencies.
+- **Interactive Operator HUD**: Dark-mode dashboard displaying the event timeline, measured request latency, model/provider mode, and citation-gate verdict.
+- **Automated Test Suite**: Native Node tests cover parsing, citation validation, HTTP behavior, and the serverless deployment handler with zero external runtime dependencies.
+
+## Inference Modes
+
+- **AMD TokenFactory mode**: set `AMD_API_KEY` to send the evidence bundle to the configured AMD endpoint. The API response reports `simulated: false`.
+- **Deterministic evaluation mode**: when no key is present, the app produces a fixed fixture response and reports `simulated: true`. This lets reviewers exercise the parser and citation gate without receiving or exposing the event credential.
+
+Set `INCIDENTLENS_FORCE_SIMULATION=true` to guarantee that local evaluation never reads an ambient AMD credential.
+
+The public deployment intentionally uses deterministic evaluation mode. The hackathon demo records a separate authenticated TokenFactory run; no AMD credential is shipped to the browser or repository.
 
 ---
 
@@ -79,7 +88,7 @@ IncidentLens enforces a strict dual-boundary architecture:
 git clone https://github.com/sidsri14/incidentlens-amd.git
 cd incidentlens-amd
 
-# Run automated test suite (15/15 passing tests)
+# Run automated test suite (19/19 passing tests)
 npm test
 
 # Start the IncidentLens Operator HUD
@@ -98,7 +107,9 @@ Visit `http://127.0.0.1:8788` in your browser.
 ✔ AmdRocmClient parses custom model overrides and trims base URL
 ✔ CitationValidator approves well-cited response referencing valid events
 ✔ CitationValidator rejects response with zero citations
-✔ CitationValidator rejects response with hallucinated event IDs
+✔ CitationValidator rejects response with unknown event IDs
+✔ CitationValidator rejects an uncited claim after a cited claim
+✔ Vercel handler labels no-key evaluation mode and serves analysis safely
 ✔ CitationValidator rejects invalid argument types
 ✔ IncidentLens server exposes /health, /api/presets, and /api/analyze
 ✔ IncidentLens server rejects malformed or non-JSON payloads

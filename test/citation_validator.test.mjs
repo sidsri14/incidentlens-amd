@@ -38,6 +38,17 @@ test('CitationValidator rejects response with hallucinated event IDs', () => {
   assert.deepEqual(verdict.invalidCitations, ['EVT-999']);
 });
 
+test('CitationValidator rejects a response with an uncited claim after a cited claim', () => {
+  const validator = new CitationValidator();
+  const validIds = new Set(['EVT-001']);
+  const content = 'The connection aborted [EVT-001]. Restart the database immediately.';
+
+  const verdict = validator.validate(content, validIds);
+  assert.equal(verdict.valid, false);
+  assert.match(verdict.failureReason, /uncited claim/);
+  assert.deepEqual(verdict.uncitedClaims, ['Restart the database immediately.']);
+});
+
 test('CitationValidator rejects invalid argument types', () => {
   const validator = new CitationValidator();
   assert.throws(() => validator.validate(null, new Set()), /must be a string/);

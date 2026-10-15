@@ -5,7 +5,9 @@
 
 export class AmdRocmClient {
   constructor(options = {}) {
-    this.apiKey = options.apiKey || process.env.AMD_API_KEY;
+    this.apiKey = Object.prototype.hasOwnProperty.call(options, 'apiKey')
+      ? options.apiKey
+      : process.env.AMD_API_KEY;
     this.baseUrl = (options.baseUrl || process.env.AMD_BASE_URL || 'https://developer.amd.com.cn/radeon/api/v1').replace(/\/+$/, '');
     this.model = options.model || process.env.AMD_MODEL || 'DeepSeek-V4-Flash';
     this.timeoutMs = options.timeoutMs || 30_000;

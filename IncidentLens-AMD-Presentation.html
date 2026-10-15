@@ -213,7 +213,7 @@
       <div class="badge-row">
         <span class="badge badge-amd">AMD Developer Hackathon: ACT III</span>
         <span class="badge badge-lablab">Team: team-9992</span>
-        <span class="badge badge-green">100% Green CI & Tests</span>
+        <span class="badge badge-green">19 Automated Tests</span>
       </div>
       <div class="slide-title" style="font-size: 32pt; margin-top: 8px;">IncidentLens AMD</div>
       <div class="slide-subtitle" style="font-size: 13pt; color: #cbd5e1; margin-top: 6px;">
@@ -226,7 +226,7 @@
   <div class="content" style="gap: 16px;">
     <div class="card card-highlight">
       <h3><span class="icon">⚡</span> The Core Problem</h3>
-      <p>Production AI gateways suffer from premature SSE stream terminations ("Ghost Spend"), retry storm cascades, and cache poisoning. When queried, ungrounded LLMs hallucinate fictional root causes and dangerous remediation commands.</p>
+      <p>LLM gateways can suffer premature SSE termination, retry cascades, and unsafe cache writes. A model asked to triage those traces can also produce plausible explanations that are not tied to any supplied event.</p>
     </div>
     <div class="card card-highlight">
       <h3><span class="icon">🛡️</span> The Evidence-Bound Fix</h3>
@@ -252,8 +252,8 @@
         <span class="badge badge-amd">Production Vulnerabilities</span>
         <span class="badge badge-lablab">AI Gateway Failure Modes</span>
       </div>
-      <div class="slide-title">Production AI Outages & The Hallucination Trap</div>
-      <div class="slide-subtitle">Why traditional AI telemetry triage fails in high-throughput enterprise deployments</div>
+      <div class="slide-title" style="font-size: 21pt;">Production AI Outages & The Hallucination Trap</div>
+      <div class="slide-subtitle">Why trace-grounded checks matter before an AI-generated incident report is shown</div>
     </div>
     <div class="slide-num">02 / 06</div>
   </div>
@@ -261,18 +261,18 @@
   <div class="content">
     <div class="card">
       <h3><span class="icon">⚠️</span> 1. Premature SSE Disconnection ("Ghost Spend")</h3>
-      <p>Client drops socket mid-generation, but upstream GPU model continues generating billable output because cancellation sentinels are missed. Billions of tokens wasted across disconnected sockets.</p>
+      <p>The fixture records a client abort before the completion marker. IncidentLens flags the incomplete stream so an operator can investigate cancellation and billing behavior without inventing downstream facts.</p>
       <div class="metric-box">
-        <div class="metric-val" style="color: #ef4444;">18,400+ Tokens / Incident</div>
-        <div class="metric-lbl">Wasted Compute on Aborted Sockets</div>
+        <div class="metric-val" style="color: #ef4444;">Abort at 490 ms</div>
+        <div class="metric-lbl">Measured in the Included Trace Fixture</div>
       </div>
     </div>
     <div class="card">
       <h3><span class="icon">⚡</span> 2. Runaway Retry Cascades & 429 Storms</h3>
       <p>Clients retry failed requests immediately without randomized exponential backoff. Gateway queues saturate, compounding upstream provider rate-limits into catastrophic service paralysis.</p>
       <div class="metric-box">
-        <div class="metric-val" style="color: #f59e0b;">12 Calls in 240ms</div>
-        <div class="metric-lbl">Triggering Upstream 429 Quota Exhaustion</div>
+        <div class="metric-val" style="color: #f59e0b;">3 HTTP 429s in 225 ms</div>
+        <div class="metric-lbl">Measured in the Included Retry Fixture</div>
       </div>
     </div>
     <div class="card">
@@ -280,7 +280,7 @@
       <p>Standard LLMs invent fictitious root causes (e.g., claiming DNS or database failure when traces show client timeouts) and recommend destructive shell commands detached from actual telemetry.</p>
       <div class="metric-box">
         <div class="metric-val" style="color: #38bdf8;">Fail-Closed Gate Required</div>
-        <div class="metric-lbl">Zero Tolerance for Uncited Claims</div>
+        <div class="metric-lbl">Reject Uncited or Unknown References</div>
       </div>
     </div>
   </div>
@@ -297,10 +297,10 @@
     <div>
       <div class="badge-row">
         <span class="badge badge-amd">System Architecture</span>
-        <span class="badge badge-green">Zero-Hallucination Pipeline</span>
+        <span class="badge badge-green">Citation-Bounded Pipeline</span>
       </div>
       <div class="slide-title">The 3-Pillar Evidence-Bound Architecture</div>
-      <div class="slide-subtitle">Deterministic trace parsing, cryptographic evidence indexing, and fail-closed citation gates</div>
+      <div class="slide-subtitle">Deterministic trace parsing, stable evidence indexing, and fail-closed citation checks</div>
     </div>
     <div class="slide-num">03 / 06</div>
   </div>
@@ -318,7 +318,7 @@
     </div>
     <div class="card">
       <h3><span class="icon">2️⃣</span> AMD ROCm Evidence Matrix</h3>
-      <p><code>src/evidence_matrix.mjs</code> converts parsed anomalies into cryptographically indexed, verifiable facts:</p>
+      <p><code>src/evidence_matrix.mjs</code> converts parsed events into a stable, inspectable evidence table:</p>
       <ul>
         <li>Every trace event receives a canonical ID: <code>[EVT-001]</code>, <code>[EVT-002]</code>.</li>
         <li>Timestamps, durations, token counts, and error codes are bound.</li>
@@ -337,7 +337,7 @@
   </div>
 
   <div class="footer">
-    <div>Automated Citation Verification &bull; No Hallucinated Remediation Allowed</div>
+    <div>Automated Citation Verification &bull; Unknown or Uncited References Rejected</div>
     <div>IncidentLens AMD &bull; Slide 3 of 6</div>
   </div>
 </div>
@@ -363,7 +363,7 @@
       <ul style="margin-top: 8px;">
         <li><strong>Endpoint:</strong> <code>https://developer.amd.com.cn/radeon/api/v1/chat/completions</code></li>
         <li><strong>Team Account:</strong> <code>team-9992</code> (authorized by AMD AI Developer Program)</li>
-        <li><strong>Accelerators:</strong> AMD GPU compute cluster (provider: <code>self-dploy</code>)</li>
+        <li><strong>Runtime:</strong> Event-issued TokenFactory endpoint; provider metadata is recorded from the API response.</li>
         <li><strong>Models:</strong> <code>DeepSeek-V4-Flash</code> (fast triage) & <code>Qwen3.8-27B</code> (deep audit)</li>
         <li><strong>Strict Evidence Prompting:</strong> Enforces event ID citation requirements directly in system instructions.</li>
       </ul>
@@ -380,7 +380,7 @@
       </div>
       <div class="metric-box">
         <div class="metric-val" style="color: #ff5e62;">5 Event Citations</div>
-        <div class="metric-lbl">100% Citation Pass Rate &bull; 0 Hallucinations</div>
+        <div class="metric-lbl">Five Known Event References Accepted by the Gate</div>
       </div>
     </div>
   </div>
@@ -411,16 +411,16 @@
       <ul>
         <li><strong>Preset Scenario Simulators:</strong> One-click generation of Ghost Spend, Retry Storms, Cache Inconsistencies, or Clean Baselines.</li>
         <li><strong>Telemetry Waterfall Table:</strong> Inspects status codes, socket duration, TTFT, token counts, and anomaly badges.</li>
-        <li><strong>Evidence Matrix Viewer:</strong> Real-time display of indexed events with cryptographic event IDs.</li>
-        <li><strong>Citation Verification Badge:</strong> Visual confirmation of 100% cited facts vs. rejected hallucinations.</li>
+        <li><strong>Evidence Matrix Viewer:</strong> Real-time display of indexed events with deterministic event IDs.</li>
+        <li><strong>Citation Verification Badge:</strong> Visual confirmation that claim units cite known IDs, or that the response was rejected.</li>
       </ul>
     </div>
     <div class="card">
       <h3><span class="icon">🛡️</span> Security & Enterprise Hardening</h3>
       <ul>
-        <li><strong>Loopback Isolation:</strong> Binds strictly to <code>127.0.0.1</code> to prevent network exposure.</li>
+        <li><strong>Explicit Deployment Modes:</strong> Local server binds to <code>127.0.0.1</code>; the public demo runs a separate no-key serverless evaluation path.</li>
         <li><strong>Content Security Policy:</strong> Strict CSP headers, <code>X-Content-Type-Options: nosniff</code>, <code>X-Frame-Options: DENY</code>.</li>
-        <li><strong>Input Sanitization:</strong> Telemetry traces sanitized against prompt injection and control character poisoning.</li>
+        <li><strong>Bounded Input:</strong> JSON-only requests are capped at 64 KiB and parsed into a constrained event schema.</li>
         <li><strong>Zero-Key Fallback:</strong> Includes deterministic offline fixtures for instant evaluation without external credentials.</li>
       </ul>
     </div>
@@ -438,10 +438,10 @@
     <div>
       <div class="badge-row">
         <span class="badge badge-amd">Engineering Rigor</span>
-        <span class="badge badge-green">Production Ready</span>
+        <span class="badge badge-green">Public OSS Prototype</span>
       </div>
       <div class="slide-title">Verification, CI/CD & Open Source Delivery</div>
-      <div class="slide-subtitle">100% pass rate across multi-version Linux and Windows CI runners</div>
+      <div class="slide-subtitle">Reproducible tests, multi-version CI, and a public MIT repository</div>
     </div>
     <div class="slide-num">06 / 06</div>
   </div>
@@ -449,12 +449,12 @@
   <div class="content">
     <div class="card">
       <h3><span class="icon">✅</span> Automated Test Suite</h3>
-      <p>15/15 passing tests using native Node.js test runner (<code>node --test</code>):</p>
+      <p>19/19 passing tests using the native Node.js test runner (<code>node --test</code>):</p>
       <ul>
         <li><code>test/trace_parser.test.mjs</code>: Ghost spend, retry storms, cache hazards, latency outliers.</li>
-        <li><code>test/evidence_matrix.test.mjs</code>: Event indexing, canonical ID formatting, serialization.</li>
-        <li><code>test/citation_validator.test.mjs</code>: Valid citation acceptance, uncited claim rejection, hallucination denial.</li>
-        <li><code>test/server.test.mjs</code>: Security headers, scenario dispatch, analysis lifecycle.</li>
+        <li><code>test/citation_validator.test.mjs</code>: Known-ID acceptance plus unknown and uncited claim rejection.</li>
+        <li><code>test/server.test.mjs</code>: Scenario dispatch and local HTTP analysis lifecycle.</li>
+        <li><code>test/vercel_handler.test.mjs</code>: No-key serverless mode and truthful mode labelling.</li>
       </ul>
     </div>
     <div class="card">
@@ -470,7 +470,7 @@
   </div>
 
   <div class="footer">
-    <div>Clone & Run: <code>git clone https://github.com/sidsri14/incidentlens-amd.git && npm test && npm start</code></div>
+    <div>Run locally: <code>npm test && npm start</code></div>
     <div>Siddharth Srivastava &bull; AMD Developer Hackathon ACT III &bull; October 2026</div>
   </div>
 </div>

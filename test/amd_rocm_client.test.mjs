@@ -2,6 +2,18 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { AmdRocmClient } from '../src/amd_rocm_client.mjs';
 
+test('AmdRocmClient honors an explicit no-key override even when the environment has a key', () => {
+  const previous = process.env.AMD_API_KEY;
+  process.env.AMD_API_KEY = 'must-not-be-used';
+  try {
+    const client = new AmdRocmClient({ apiKey: null });
+    assert.equal(client.apiKey, null);
+  } finally {
+    if (previous === undefined) delete process.env.AMD_API_KEY;
+    else process.env.AMD_API_KEY = previous;
+  }
+});
+
 test('AmdRocmClient falls back to deterministic simulated completion when no API key provided', async () => {
   const client = new AmdRocmClient({ apiKey: null });
   const result = await client.complete('Analyze PREMATURE_DISCONNECT in stream [EVT-004]');

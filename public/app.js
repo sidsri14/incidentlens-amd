@@ -18,6 +18,7 @@ const rocmModelVal = document.querySelector('#rocm-model-val');
 const rocmProviderVal = document.querySelector('#rocm-provider-val');
 const rocmTimeVal = document.querySelector('#rocm-time-val');
 const rocmTokensVal = document.querySelector('#rocm-tokens-val');
+const modelBadge = document.querySelector('#model-badge');
 
 presetButtons.forEach((btn) => {
   btn.addEventListener('click', () => {
@@ -30,7 +31,7 @@ presetButtons.forEach((btn) => {
 async function runAnalysis() {
   if (!analyzeBtn) return;
   analyzeBtn.disabled = true;
-  analyzeBtn.textContent = 'Running AMD ROCm Inference & Citation Gate...';
+  analyzeBtn.textContent = 'Running analysis and citation checks...';
 
   try {
     const res = await fetch('/api/analyze', {
@@ -50,13 +51,19 @@ async function runAnalysis() {
     alert(`Error: ${err.message}`);
   } finally {
     analyzeBtn.disabled = false;
-    analyzeBtn.textContent = 'Analyze Incident with AMD ROCm Inference →';
+    analyzeBtn.textContent = 'Analyze Incident →';
   }
 }
 
 function renderResults(data) {
   // 1. Update Metrics
   const { telemetry, timeline, anomalies, analysis, citationVerification, rocmPerformance } = data;
+
+  if (modelBadge) {
+    modelBadge.textContent = analysis.simulated
+      ? 'Mode: deterministic evaluation'
+      : `Model: ${analysis.model}`;
+  }
 
   if (statSeverity) {
     statSeverity.textContent = telemetry.overallSeverity || 'NORMAL';
@@ -68,10 +75,10 @@ function renderResults(data) {
 
   if (statCitation) {
     if (citationVerification.valid) {
-      statCitation.textContent = `100% Passed (${citationVerification.totalCitations} citations)`;
+      statCitation.textContent = `Passed (${citationVerification.totalCitations} citations)`;
       statCitation.style.color = '#10b981';
     } else {
-      statCitation.textContent = 'FAILED (Hallucinated)';
+      statCitation.textContent = 'REJECTED';
       statCitation.style.color = '#ef4444';
     }
   }
@@ -149,3 +156,19 @@ function renderResults(data) {
 if (analyzeBtn) {
   analyzeBtn.addEventListener('click', runAnalysis);
 }
+
+async function labelInferenceMode() {
+  if (!modelBadge) return;
+  try {
+    const response = await fetch('/health');
+    if (!response.ok) return;
+    const health = await response.json();
+    modelBadge.textContent = health.amdConfigured
+      ? `Model: ${health.amdModel}`
+      : 'Mode: deterministic evaluation';
+  } catch {
+    // The main analysis action will still report the exact provider and mode.
+  }
+}
+
+labelInferenceMode();
