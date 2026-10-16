@@ -60,15 +60,15 @@ export class CitationValidator {
     const citationDensity = wordCount > 0 ? (extractedCitations.length / wordCount) * 100 : 0;
 
     const hasCitations = extractedCitations.length > 0;
-    const hasZeroHallucinations = uniqueInvalid.length === 0;
+    const hasNoUnknownIds = uniqueInvalid.length === 0;
 
-    const isValid = hasCitations && hasZeroHallucinations && uncitedClaims.length === 0;
+    const isValid = hasCitations && hasNoUnknownIds && uncitedClaims.length === 0;
 
     let failureReason = null;
     if (!hasCitations) {
       failureReason = 'Model output contains zero event citations [EVT-XXX]; uncited claims rejected';
-    } else if (!hasZeroHallucinations) {
-      failureReason = `Model hallucinated non-existent event IDs: ${uniqueInvalid.join(', ')}`;
+    } else if (!hasNoUnknownIds) {
+      failureReason = `Model output references unknown event IDs: ${uniqueInvalid.join(', ')}`;
     } else if (uncitedClaims.length > 0) {
       failureReason = `Model output contains ${uncitedClaims.length} uncited claim(s)`;
     }

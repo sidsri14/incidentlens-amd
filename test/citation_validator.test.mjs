@@ -5,7 +5,7 @@ import { CitationValidator } from '../src/citation_validator.mjs';
 test('CitationValidator approves well-cited response referencing valid events', () => {
   const validator = new CitationValidator();
   const validIds = new Set(['EVT-001', 'EVT-002', 'EVT-003']);
-  const content = 'The connection aborted prematurely [EVT-002] causing ghost token usage [EVT-003]. Remediation: cancel upstream [EVT-001].';
+  const content = 'The connection aborted prematurely [EVT-002] after a partial response [EVT-003]. Remediation: record upstream cancellation [EVT-001].';
 
   const verdict = validator.validate(content, validIds);
   assert.equal(verdict.valid, true);
@@ -27,14 +27,14 @@ test('CitationValidator rejects response with zero citations', () => {
   assert.equal(verdict.totalCitations, 0);
 });
 
-test('CitationValidator rejects response with hallucinated event IDs', () => {
+test('CitationValidator rejects response with unknown event IDs', () => {
   const validator = new CitationValidator();
   const validIds = new Set(['EVT-001', 'EVT-002']);
-  const content = 'The connection aborted [EVT-001], but event [EVT-999] was hallucinated.';
+  const content = 'The connection aborted [EVT-001], but the report also references unknown event [EVT-999].';
 
   const verdict = validator.validate(content, validIds);
   assert.equal(verdict.valid, false);
-  assert.match(verdict.failureReason, /hallucinated non-existent event IDs/);
+  assert.match(verdict.failureReason, /unknown event IDs/);
   assert.deepEqual(verdict.invalidCitations, ['EVT-999']);
 });
 

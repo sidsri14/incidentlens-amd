@@ -6,7 +6,7 @@
 
 > **AMD Developer Hackathon: ACT III Submission**  
 > **Team**: `team-9992` (Siddharth Srivastava)  
-> **Infrastructure**: AMD TokenFactory ROCm Infrastructure (`DeepSeek-V4-Flash` / `Qwen3.8-27B`)  
+> **Infrastructure**: AMD TokenFactory chat-completions adapter (default model: `DeepSeek-V4-Flash`)
 > **Repository**: [https://github.com/sidsri14/incidentlens-amd](https://github.com/sidsri14/incidentlens-amd)
 
 ---
@@ -17,11 +17,11 @@
 
 IncidentLens enforces a strict dual-boundary architecture:
 1. **Deterministic Telemetry Parser**: Ingests raw gateway logs, parses Server-Sent Events (SSE) lifecycle transitions, and algorithmically identifies structural anomalies:
-   - **Premature SSE Disconnection (Ghost Spend)**: Detects client socket abortions before `[DONE]` sentinels where upstream inference continues generating billable tokens.
+   - **Premature SSE Disconnection**: Detects a captured stream ending before a `[DONE]` sentinel. The trace does not claim whether upstream generation continued.
    - **Retry Storms & 429 Cascades**: Flags rapid retries executed without exponential jitter.
    - **Cache Inconsistency on Partial Streams**: Identifies attempted cache writes on truncated streams.
    - **Latency SLA Outliers**: Tracks Time-To-First-Token (TTFT) and inter-chunk latency spikes.
-2. **AMD ROCm Evidence Matrix**: Indexes all trace points into verifiable event IDs (`[EVT-001]`, `[EVT-002]`, etc.) and sends only the factual evidence bundle to AMD ROCm TokenFactory.
+2. **Evidence Matrix**: Indexes trace points into stable event IDs (`[EVT-001]`, `[EVT-002]`, etc.) and sends the bounded evidence bundle to AMD TokenFactory when an API key is configured.
 3. **Automated Citation Verification Gate**: Evaluates the model's response; every non-heading claim unit must cite at least one known event ID. Outputs containing an uncited claim or an unknown event ID are rejected **fail-closed**. This verifies citation coverage and ID validity, not whether every cited inference is logically correct.
 
 ![IncidentLens AMD UI Screenshot](incidentlens-ui.png)
@@ -42,11 +42,11 @@ exposing the event credential to a public browser.
               ▼
     1. Deterministic Trace Parser
        ├─ Metric Extraction (TTFT, Chunk Latency, Token Counts)
-       └─ Anomaly Flagging (Ghost Spend, Retry Storms, Cache Hazards)
+       └─ Anomaly Flagging (Premature Disconnects, Retry Storms, Cache Hazards)
               │
               ▼
     2. Evidence Matrix Indexer
-       └─ Assigns Cryptographic Event IDs ([EVT-001], [EVT-002]...)
+       └─ Assigns Stable Event IDs ([EVT-001], [EVT-002]...)
               │
               ▼
     3. AMD ROCm TokenFactory Inference (DeepSeek-V4-Flash)
@@ -55,7 +55,7 @@ exposing the event credential to a public browser.
               ▼
     4. Citation Verification Gate
        ├─ Checks Every Claim for Valid Event ID Brackets
-       ├─ Rejects Hallucinations & Uncited Speculation Fail-Closed
+       ├─ Rejects Unknown IDs & Uncited Claim Units Fail-Closed
        └─ Computes Citation Density & Integrity Score
               │
               ▼
@@ -79,7 +79,7 @@ exposing the event credential to a public browser.
 
 Set `INCIDENTLENS_FORCE_SIMULATION=true` to guarantee that local evaluation never reads an ambient AMD credential.
 
-The public deployment intentionally uses deterministic evaluation mode. The hackathon demo records a separate authenticated TokenFactory run; no AMD credential is shipped to the browser or repository.
+The public deployment and hackathon video intentionally exercise deterministic evaluation mode. The repository includes the authenticated TokenFactory adapter, but no AMD credential is shipped to the browser or repository.
 
 ---
 
@@ -108,6 +108,7 @@ Visit `http://127.0.0.1:8788` in your browser.
 ## Automated Test Coverage
 
 ```
+✔ AmdRocmClient honors an explicit no-key override even when the environment has a key
 ✔ AmdRocmClient falls back to deterministic simulated completion when no API key provided
 ✔ AmdRocmClient rejects non-string prompts
 ✔ AmdRocmClient parses custom model overrides and trims base URL
@@ -115,18 +116,19 @@ Visit `http://127.0.0.1:8788` in your browser.
 ✔ CitationValidator rejects response with zero citations
 ✔ CitationValidator rejects response with unknown event IDs
 ✔ CitationValidator rejects an uncited claim after a cited claim
-✔ Vercel handler labels no-key evaluation mode and serves analysis safely
 ✔ CitationValidator rejects invalid argument types
 ✔ IncidentLens server exposes /health, /api/presets, and /api/analyze
 ✔ IncidentLens server rejects malformed or non-JSON payloads
-✔ TraceParser detects PREMATURE_DISCONNECT and ghost spend
+✔ TraceParser detects PREMATURE_DISCONNECT before an explicit completion marker
 ✔ TraceParser detects CACHE_POISONING_RISK when cache write occurs on uncompleted stream
 ✔ TraceParser detects RETRY_STORM when rapid retries occur without backoff
 ✔ TraceParser detects RATE_LIMIT_CASCADE on upstream 429 errors
 ✔ TraceParser flags LATENCY_OUTLIER on inter-chunk gaps exceeding 3000ms
 ✔ TraceParser rejects empty or invalid input
-ℹ tests 15
-ℹ pass 15
+✔ Vercel analyze handler runs the deterministic no-key evaluation path
+✔ Vercel health handler labels its inference mode truthfully
+ℹ tests 19
+ℹ pass 19
 ℹ fail 0
 ```
 

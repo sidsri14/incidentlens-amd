@@ -15,8 +15,8 @@ const MAX_BODY_BYTES = 64 * 1024;
 export const PRESET_SCENARIOS = {
   'premature-disconnect': {
     id: 'premature-disconnect',
-    title: 'SSE Premature Disconnection & Ghost Token Spend',
-    description: 'Client aborts HTTP stream midway; gateway fails to cancel upstream ROCm inference, incurring ghost token charges.',
+    title: 'SSE Premature Disconnection Before Completion',
+    description: 'The captured client stream terminates before an explicit [DONE] marker; the trace does not establish the upstream cancellation outcome.',
     events: [
       { id: 'EVT-001', timestamp: 0, type: 'HTTP_REQUEST_STARTED', method: 'POST', route: '/v1/chat/completions', model: 'DeepSeek-V4-Flash', streaming: true },
       { id: 'EVT-002', timestamp: 120, type: 'HTTP_STATUS_RECEIVED', statusCode: 200 },

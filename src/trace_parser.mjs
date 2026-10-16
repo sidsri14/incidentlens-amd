@@ -95,13 +95,13 @@ export class TraceParser {
       }
     }
 
-    // Anomaly Check 1: Premature Disconnection (Ghost Spend)
+    // Anomaly Check 1: Premature disconnection before an explicit completion marker.
     if (isStreaming && streamTerminated && !hasDoneMarker) {
       anomalies.push({
         type: ANOMALY_TYPES.PREMATURE_DISCONNECT,
         eventId: streamTerminated.id,
         severity: 'HIGH',
-        detail: `Stream terminated (${streamTerminated.reason || 'unknown'}) before emitting [DONE] marker; upstream model incurred ${totalTokens} tokens of unreceived output`,
+        detail: `Stream terminated (${streamTerminated.reason || 'unknown'}) before emitting a [DONE] marker after ${totalTokens} observed tokens; the trace does not establish whether upstream generation continued`,
         timestamp: streamTerminated.timestamp,
       });
     }

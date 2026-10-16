@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { TraceParser, ANOMALY_TYPES } from '../src/trace_parser.mjs';
 
-test('TraceParser detects PREMATURE_DISCONNECT and ghost spend', () => {
+test('TraceParser detects PREMATURE_DISCONNECT before an explicit completion marker', () => {
   const parser = new TraceParser();
   const events = [
     { id: 'EVT-001', timestamp: 0, type: 'HTTP_REQUEST_STARTED', streaming: true },

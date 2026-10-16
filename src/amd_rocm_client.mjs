@@ -1,6 +1,6 @@
 /**
  * AMD ROCm TokenFactory client for LLM inference.
- * Supports DeepSeek-V4-Flash, Qwen3.8-27B, and simulated offline mode.
+ * Supports a configurable TokenFactory chat-completions model and simulated offline mode.
  */
 
 export class AmdRocmClient {
@@ -99,8 +99,8 @@ export class AmdRocmClient {
     let remediation = '';
 
     if (isDisconnect) {
-      diagnosis = 'The stream suffered a premature client abortion before the [DONE] marker was emitted [EVT-004]. Upstream inference continued generating unconsumed output [EVT-003], leading to ghost compute costs.';
-      remediation = '1. Implement upstream cancellation signaling when the client socket disconnects [EVT-004].\n2. Introduce gateway timeout guards to abort orphaned upstream streams [EVT-002].\n3. Suppress downstream billable tokens on dropped connections [EVT-003].';
+      diagnosis = 'The captured stream ended before the [DONE] marker after two data chunks were recorded [EVT-003] [EVT-004] and a client-abort termination was observed [EVT-005]. The trace does not establish whether upstream generation continued after the disconnect [EVT-005].';
+      remediation = '1. Propagate and record upstream cancellation when the downstream socket disconnects [EVT-005].\n2. Record the upstream completion or cancellation outcome before attributing post-disconnect compute [EVT-005].\n3. Treat the partial response as incomplete unless an explicit completion marker is observed [EVT-003] [EVT-004].';
     } else if (isRetry) {
       diagnosis = 'Multiple rapid retries triggered a downstream cascade [EVT-002] [EVT-003], causing consecutive HTTP 429 rate limits [EVT-004].';
       remediation = '1. Add exponential backoff with full jitter to gateway retry logic [EVT-002].\n2. Enforce a circuit breaker when rate limits are detected [EVT-004].\n3. Deduplicate identical client request payloads [EVT-003].';
